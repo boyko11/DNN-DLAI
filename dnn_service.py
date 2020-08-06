@@ -18,9 +18,9 @@ def initialize_parameters(n_x, n_h, n_y):
     np.random.seed(1)
 
     W1 = np.random.randn(n_h, n_x) * 0.01
-    b1 = np.zeros((n_h, 1)) * 0.01
+    b1 = np.zeros((n_h, 1))
     W2 = np.random.randn(n_y, n_h) * 0.01
-    b2 = np.zeros((n_y, 1)) * 0.01
+    b2 = np.zeros((n_y, 1))
 
     assert (W1.shape == (n_h, n_x))
     assert (b1.shape == (n_h, 1))
@@ -53,7 +53,7 @@ def initialize_parameters_deep(layer_dims):
     for l in range(1, L):
         ### START CODE HERE ### (≈ 2 lines of code)
         parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l - 1]) * 0.01
-        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1)) * 0.01
+        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
         ### END CODE HERE ###
 
         assert (parameters['W' + str(l)].shape == (layer_dims[l], layer_dims[l - 1]))
@@ -61,6 +61,28 @@ def initialize_parameters_deep(layer_dims):
 
     return parameters
 
+
+def update_parameters(parameters, grads, learning_rate):
+    """
+    Update parameters using gradient descent
+
+    Arguments:
+    parameters -- python dictionary containing your parameters
+    grads -- python dictionary containing your gradients, output of L_model_backward
+
+    Returns:
+    parameters -- python dictionary containing your updated parameters
+                  parameters["W" + str(l)] = ...
+                  parameters["b" + str(l)] = ...
+    """
+
+    L = len(parameters) // 2  # number of layers in the neural network
+
+    # Update rule for each parameter. Use a for loop.
+    for l in range(L):
+        parameters["W" + str(l + 1)] = parameters["W" + str(l + 1)] - learning_rate * grads["dW" + str(l + 1)]
+        parameters["b" + str(l + 1)] = parameters["b" + str(l + 1)] - learning_rate * grads["db" + str(l + 1)]
+    return parameters
 
 def linear_forward(A, W, b):
     """
@@ -94,7 +116,7 @@ def sigmoid(Z):
 
 def relu(Z):
 
-    A = np.max(0, Z)
+    A = np.maximum(0, Z)
     cache = Z
     return A, cache
 
@@ -341,3 +363,9 @@ def L_model_backward(AL, Y, caches):
         grads["db" + str(l + 1)] = db_temp
 
     return grads
+
+
+def accuracy(predicted, actual):
+    predicted_plus_actual = predicted + actual
+    predicted_plus_actual[predicted_plus_actual == 2] = 0
+    return 1 - (np.count_nonzero(predicted_plus_actual) / predicted.shape[1])
